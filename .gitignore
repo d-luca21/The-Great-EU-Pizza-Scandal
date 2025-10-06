@@ -10,3 +10,7 @@ app/.env
 .vscode/
 .DS_Store
 Thumbs.db
+
+# accidental files
+-Force/
+$null
