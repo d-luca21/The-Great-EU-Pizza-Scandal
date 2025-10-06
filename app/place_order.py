@@ -32,7 +32,7 @@ def load_json_arg(s: str):
 def d(x): return Decimal(str(x))
 
 def parse_args():
-    ap = ArgumentParser(description="Place an order (single traansaction).")
+    ap = ArgumentParser(description = "Place an order (single transaction).")
     ap.add_argument("--customer-id", type = int, required = True)
     ap.add_argument("--address-id", type = int, required = True)
     ap.add_argument("--postal-code", type = str, required = True)
@@ -234,6 +234,19 @@ def main():
         curr.close()
         cnx.close()
 
-if __name__ == "__main__": main()
+if __name__ == "__main__":
+    if len(sys.argv) == 1:
+        sys.argv += [
+            "--customer-id", "1",
+            "--address-id", "1",
+            "--postal-code", "6211AA",
+            "--pizzas", "[{pizza_id:1, size:M, qty:1}]",
+            "--drinks", "[]",
+            "--desserts", "[]"
+        ]
+
+        print("[place_order] No args passed, using defaults for VSCode run.")
+
+    main()
 
             
