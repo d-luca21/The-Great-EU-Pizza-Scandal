@@ -40,6 +40,8 @@ def parse_args():
     ap.add_argument("--drinks", type = str, default = "[]")
     ap.add_argument("--desserts", type = str, default = "[]")
     ap.add_argument("--discount-code", type = str, default = None)
+    ap.add_argument("--fail-after", type=str, choices=["insert-lines","assign-driver","before-commit"])
+
     return ap.parse_args()
 
 def fetch_price(curr, pizza_id, size):
@@ -161,6 +163,12 @@ def main():
                 """, (order_id, int(i["dessert_id"]), int(i["qty"]))
             )
 
+
+        # --- simulate failure after inserting order lines (tests rollback) ---
+        if getattr(args, "fail_after", None) == "insert-lines":
+            raise RuntimeError("Simulated failure after inserting order lines")
+
+
         subtotal = d("0.00")
         pizza_line_prices = []
 
@@ -211,12 +219,20 @@ def main():
 
         driver_id = pick_driver(curr, args.postal_code)
 
+        # --- simulate failure after driver selection ---
+        if getattr(args, "fail_after", None) == "assign-driver":
+            raise RuntimeError("Simulated failure after driver selection")
+
         curr.execute(
             """
             INSERT INTO deliveries(order_id, assigned_to, assigned_at, delivered_at)
             VALUES (%s, %s, NOW(), NULL)
             """, (order_id, driver_id)
         )
+
+        # --- simulate failure right before commit ---
+        if getattr(args, "fail_after", None) == "before-commit":
+            raise RuntimeError("Simulated failure right before commit")
 
         cnx.commit()
         print("Order placed.")
